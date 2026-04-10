@@ -1,0 +1,227 @@
+// prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// ENUMS (Reglas de negocio e integridad)
+// ==========================================
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AccountType {
+  BANK
+  CASH
+  CREDIT_CARD
+  INVESTMENT
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum DocumentType {
+  RECEIPT
+  INVOICE
+  PAYROLL
+  CONTRACT
+  OTHER
+}
+
+// ==========================================
+// MODELOS DE NÚCLEO (Core)
+// ==========================================
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones (Aislamiento Multi-tenant)
+  accounts          Account[]
+  expenseCategories ExpenseCategory[]
+  incomeCategories  IncomeCategory[]
+  expenses          Expense[]
+  incomes           Income[]
+  recurringPayments RecurringPayment[]
+  debts             Debt[]
+  savingGoals       SavingGoal[]
+  documents         Document[]
+}
+
+model Account {
+  id          String      @id @default(uuid())
+  name        String
+  type        AccountType
+  description String?     @default("")
+  balance     Decimal     @db.Decimal(10, 2)
+  isActive    Boolean     @default(true) // Borrado lógico para preservar histórico
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expenses    Expense[]
+  incomes     Income[]
+
+  @@unique([name, userId]) // Unicidad por usuario
+}
+
+// ==========================================
+// CATEGORIZACIÓN (Analítica)
+// ==========================================
+
+model ExpenseCategory {
+  id            String    @id @default(uuid())
+  name          String
+  description   String?
+  colorCode     String?   @default("#000000")
+  monthlyBudget Decimal?  @db.Decimal(10, 2) // Clave para la IA
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expenses      Expense[]
+
+  @@unique([name, userId])
+}
+
+model IncomeCategory {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  colorCode   String?   @default("#000000")
+  
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  incomes     Income[]
+
+  @@unique([name, userId])
+}
+
+// ==========================================
+// TRANSACCIONES (Big Data)
+// ==========================================
+
+model Expense {
+  id          String   @id @default(uuid())
+  amount      Decimal  @db.Decimal(10, 2)
+  description String?
+  date        DateTime @default(now())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  accountId   String
+  account     Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  categoryId  String
+  category    ExpenseCategory @relation(fields: [categoryId], references: [id])
+
+  documents   Document[]
+
+  @@index([userId, date]) // Optimización para Metabase y analítica
+}
+
+model Income {
+  id          String   @id @default(uuid())
+  amount      Decimal  @db.Decimal(10, 2)
+  description String?
+  date        DateTime @default(now())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  accountId   String
+  account     Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  categoryId  String
+  category    IncomeCategory @relation(fields: [categoryId], references: [id])
+
+  @@index([userId, date])
+}
+
+// ==========================================
+// PLANIFICACIÓN Y DEUDA (Predicción IA)
+// ==========================================
+
+model RecurringPayment {
+  id          String    @id @default(uuid())
+  name        String
+  amount      Decimal   @db.Decimal(10, 2)
+  frequency   Frequency
+  nextDueDate DateTime
+  active      Boolean   @default(true)
+
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Debt {
+  id           String   @id @default(uuid())
+  name         String
+  amount       Decimal  @db.Decimal(10, 2)
+  interestRate Decimal? @db.Decimal(5, 2) // Para cálculo de riesgos por IA
+  dueDate      DateTime
+  paid         Boolean  @default(false)
+
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SavingGoal {
+  id            String    @id @default(uuid())
+  name          String
+  targetAmount  Decimal   @db.Decimal(10, 2)
+  currentAmount Decimal   @db.Decimal(10, 2) @default(0)
+  dueDate       DateTime?
+
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  deposits      SavingGoalDeposit[]
+}
+
+model SavingGoalDeposit {
+  id           String   @id @default(uuid())
+  amount       Decimal  @db.Decimal(10, 2)
+  date         DateTime @default(now())
+
+  savingGoalId String
+  savingGoal   SavingGoal @relation(fields: [savingGoalId], references: [id], onDelete: Cascade)
+}
+
+// ==========================================
+// DOCUMENTACIÓN Y EVIDENCIAS
+// ==========================================
+
+model Document {
+  id         String       @id @default(uuid())
+  name       String
+  type       DocumentType
+  url        String
+  uploadedAt DateTime     @default(now())
+
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expenseId  String?
+  expense    Expense?     @relation(fields: [expenseId], references: [id])
+}

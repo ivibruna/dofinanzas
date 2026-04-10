@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine # Usamos Alpine porque es una versión súper ligera (menos peso en disco)
+    container_name: dofinanzas-db
+    restart: always
+    environment:
+      POSTGRES_USER: dofinanzas
+      POSTGRES_PASSWORD: dofinanzas
+      POSTGRES_DB: dofinanzas_db
+    ports:
+      - "5433:5432" # Mapeamos el puerto de tu PC al puerto del contenedor
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Esto guarda los datos para que no se borren al apagar Docker
+
+volumes:
+  postgres_data:
