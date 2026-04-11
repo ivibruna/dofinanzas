@@ -3,10 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { AuthDto } from './dto/auth.dto';
 import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+) {}
 
   async register(dto: AuthDto) {
     const userExists = await this.prisma.user.findUnique({
@@ -35,31 +39,31 @@ export class AuthService {
   }
 
   async login(dto: AuthDto) {
-    // 1. Buscar al usuario por email
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
 
-    // 2. Si no existe, lanzamos error 401
-    // Nota pro: Usamos el mismo mensaje para email o password incorrectos por seguridad
     if (!user) {
       throw new UnauthorizedException('Credenciales incorrectas');
     }
 
-    // 3. Comparar la contraseña tecleada con el hash de la BD
     const pwMatches = await bcrypt.compare(dto.password, user.password);
 
-    // 4. Si no coinciden, error 401
     if (!pwMatches) {
       throw new UnauthorizedException('Credenciales incorrectas');
     }
 
-    // 5. Si todo está ok, de momento devolvemos un mensaje de éxito
-    // (En el siguiente paso aquí generaremos el Token JWT)
+    // 3. Creamos el "Payload" (los datos públicos que irán dentro del token)
+    // Usamos 'sub' (subject) para el ID del usuario, que es el estándar JWT
+    const payload = { sub: user.id, email: user.email };
+
+    // 4. Firmamos el token usando tu secreto del archivo .env
+    const token = await this.jwtService.signAsync(payload);
+
+    // 5. Devolvemos el token al frontend
     return {
       message: 'Has iniciado sesión correctamente',
-      userId: user.id,
-      email: user.email
+      accessToken: token, // ¡Aquí va el pasaporte!
     };
   }
 }
