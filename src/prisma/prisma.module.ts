@@ -1,9 +1,9 @@
 import { Global, Module } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 
-@Global() // Hacemos que Prisma esté disponible en todo el proyecto
+@Global()
 @Module({
   providers: [PrismaService],
-  exports: [PrismaService], // Lo exportamos para que otros módulos lo usen
+  exports: [PrismaService], // <-- Esto es lo que permite que AuthModule lo use
 })
 export class PrismaModule {}

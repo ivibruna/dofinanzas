@@ -1,14 +1,25 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { AuthDto } from './dto/auth.dto';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 
+@ApiTags('Auth') // Esto pone el título bonito en Swagger
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // POST http://localhost:3000/auth/login
-  @HttpCode(HttpStatus.OK)
+  @Post('register')
+  @ApiOperation({ summary: 'Registrar un nuevo usuario' })
+  register(@Body() dto: AuthDto) {
+    // Ahora sí, delegamos el trabajo en el servicio
+    return this.authService.register(dto);
+  }
+
   @Post('login')
-  signIn(@Body() signInDto: Record<string, any>) {
-    return this.authService.login(signInDto.email, signInDto.password);
+  @HttpCode(HttpStatus.OK) // Cambiamos el 201 por un 200
+  @ApiOperation({ summary: 'Iniciar sesión' })
+  login(@Body() dto: AuthDto) {
+    return this.authService.login(dto);
   }
 }
