@@ -54,8 +54,8 @@ model User {
 
   // Relaciones (Aislamiento Multi-tenant)
   accounts          Account[]
-  expenseCategories ExpenseCategory[]
-  incomeCategories  IncomeCategory[]
+  expenseCategory ExpenseCategory[]
+  incomeCategory  IncomeCategory[]
   expenses          Expense[]
   incomes           Income[]
   recurringPayments RecurringPayment[]

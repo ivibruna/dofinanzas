@@ -4,7 +4,7 @@ import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto';
 import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto';
 
 @Injectable()
-export class ExpenseCategoriesService {
+export class ExpenseCategoryService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: string, dto: CreateExpenseCategoryDto) {
