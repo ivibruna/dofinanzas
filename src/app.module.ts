@@ -10,6 +10,7 @@ import { IncomesModule } from './income/incomes.module';
 import { SavingGoalsModule } from './saving-goals/saving-goals.module';
 import { SavingGoalDepositsModule } from './saving-goal-deposits/saving-goal-deposits.module';
 import { RecurringPaymentModule } from './recurring-payment/recurring-payment.module';
+import { DebtModule } from './debt/debt.module';
 // Asegúrate de NO importar el AuthController aquí arriba
 
 @Module({
@@ -23,7 +24,8 @@ imports: [
   IncomesModule,
   SavingGoalsModule,
   SavingGoalDepositsModule,
-  RecurringPaymentModule
+  RecurringPaymentModule,
+  DebtModule
 ],
   controllers: [], // <-- ¡OJO! Aquí NO debe estar AuthController
   providers: [],
