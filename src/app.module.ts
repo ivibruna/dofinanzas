@@ -7,6 +7,7 @@ import { ExpenseCategoryModule } from './expense-category/expense-category.modul
 import { ExpensesModule } from './expense/expenses.module';
 import { IncomeCategoryModule } from './income-category/income-category.module';
 import { IncomesModule } from './income/incomes.module';
+import { SavingGoalsModule } from './saving-goals/saving-goals.module';
 // Asegúrate de NO importar el AuthController aquí arriba
 
 @Module({
@@ -17,7 +18,8 @@ imports: [
   ExpenseCategoryModule, 
   ExpensesModule, 
   IncomeCategoryModule,
-  IncomesModule // <-- Añadido
+  IncomesModule,
+  SavingGoalsModule
 ],
   controllers: [], // <-- ¡OJO! Aquí NO debe estar AuthController
   providers: [],
