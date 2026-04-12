@@ -54,8 +54,8 @@ model User {
 
   // Relaciones (Aislamiento Multi-tenant)
   accounts          Account[]
-  expenseCategory ExpenseCategory[]
-  incomeCategory  IncomeCategory[]
+  expenseCategory   ExpenseCategory[]
+  incomeCategory    IncomeCategory[]
   expenses          Expense[]
   incomes           Income[]
   recurringPayments RecurringPayment[]
@@ -74,11 +74,12 @@ model Account {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  expenses    Expense[]
-  incomes     Income[]
+  expenses          Expense[]
+  incomes           Income[]
+  recurringPayments RecurringPayment[]
 
   @@unique([name, userId]) // Unicidad por usuario
 }
@@ -88,30 +89,31 @@ model Account {
 // ==========================================
 
 model ExpenseCategory {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   name          String
   description   String?
-  colorCode     String?   @default("#000000")
-  monthlyBudget Decimal?  @db.Decimal(10, 2) // Clave para la IA
-  
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  colorCode     String?  @default("#000000")
+  monthlyBudget Decimal? @db.Decimal(10, 2) // Clave para la IA
 
-  expenses      Expense[]
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expenses          Expense[]
+  recurringPayments RecurringPayment[]
 
   @@unique([name, userId])
 }
 
 model IncomeCategory {
-  id          String    @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   description String?
-  colorCode   String?   @default("#000000")
-  
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  colorCode   String? @default("#000000")
 
-  incomes     Income[]
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  incomes Income[]
 
   @@unique([name, userId])
 }
@@ -126,16 +128,16 @@ model Expense {
   description String?
   date        DateTime @default(now())
 
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  accountId   String
-  account     Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
-  categoryId  String
-  category    ExpenseCategory @relation(fields: [categoryId], references: [id])
+  categoryId String
+  category   ExpenseCategory @relation(fields: [categoryId], references: [id])
 
-  documents   Document[]
+  documents Document[]
 
   @@index([userId, date]) // Optimización para Metabase y analítica
 }
@@ -146,14 +148,14 @@ model Income {
   description String?
   date        DateTime @default(now())
 
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  accountId   String
-  account     Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
-  categoryId  String
-  category    IncomeCategory @relation(fields: [categoryId], references: [id])
+  categoryId String
+  category   IncomeCategory @relation(fields: [categoryId], references: [id])
 
   @@index([userId, date])
 }
@@ -170,8 +172,17 @@ model RecurringPayment {
   nextDueDate DateTime
   active      Boolean   @default(true)
 
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Relación con el Usuario (El dueño de la suscripción)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relación con la Cuenta Bancaria (De dónde sale el dinero)
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  // Relación con la Categoría (En qué se gasta)
+  categoryId String
+  category   ExpenseCategory @relation(fields: [categoryId], references: [id])
 }
 
 model Debt {
@@ -182,27 +193,27 @@ model Debt {
   dueDate      DateTime
   paid         Boolean  @default(false)
 
-  userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model SavingGoal {
   id            String    @id @default(uuid())
   name          String
   targetAmount  Decimal   @db.Decimal(10, 2)
-  currentAmount Decimal   @db.Decimal(10, 2) @default(0)
+  currentAmount Decimal   @default(0) @db.Decimal(10, 2)
   dueDate       DateTime?
 
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  deposits      SavingGoalDeposit[]
+  deposits SavingGoalDeposit[]
 }
 
 model SavingGoalDeposit {
-  id           String   @id @default(uuid())
-  amount       Decimal  @db.Decimal(10, 2)
-  date         DateTime @default(now())
+  id     String   @id @default(uuid())
+  amount Decimal  @db.Decimal(10, 2)
+  date   DateTime @default(now())
 
   savingGoalId String
   savingGoal   SavingGoal @relation(fields: [savingGoalId], references: [id], onDelete: Cascade)
@@ -219,9 +230,9 @@ model Document {
   url        String
   uploadedAt DateTime     @default(now())
 
-  userId     String
-  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  expenseId  String?
-  expense    Expense?     @relation(fields: [expenseId], references: [id])
+  expenseId String?
+  expense   Expense? @relation(fields: [expenseId], references: [id])
 }
