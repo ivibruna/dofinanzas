@@ -12,6 +12,7 @@ import { SavingGoalDepositsModule } from './saving-goal-deposits/saving-goal-dep
 import { RecurringPaymentModule } from './recurring-payment/recurring-payment.module';
 import { DebtModule } from './debt/debt.module';
 import { DocumentModule } from './document/document.module';
+import { ScheduleModule } from '@nestjs/schedule'; //Para los Cron Jobs de los pagos recurrentes
 // Asegúrate de NO importar el AuthController aquí arriba
 
 @Module({
@@ -27,7 +28,8 @@ imports: [
   SavingGoalDepositsModule,
   RecurringPaymentModule,
   DebtModule,
-  DocumentModule
+  DocumentModule,
+  ScheduleModule.forRoot() //Para los Cron Jobs de los pagos recurrentes
 ],
   controllers: [], // <-- ¡OJO! Aquí NO debe estar AuthController
   providers: [],
