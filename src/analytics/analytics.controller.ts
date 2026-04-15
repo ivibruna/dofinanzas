@@ -45,4 +45,22 @@ export class AnalyticsController {
   getExpenseAverages(@Request() req) {
     return this.analyticsService.getExpenseAverages(req.user.userId);
   }
+
+  @Get('saving-goals-progress')
+  @ApiOperation({ summary: 'Ver el porcentaje de cumplimiento de las huchas' })
+  getSavingGoalsProgress(@Request() req) {
+    return this.analyticsService.getSavingGoalsProgress(req.user.userId);
+  }
+
+  @Get('savings-ratio')
+  @ApiOperation({ summary: 'Calcular el ratio de ahorro mensual y estado financiero' })
+  getSavingsRatio(@Request() req) {
+    return this.analyticsService.getSavingsRatio(req.user.userId);
+  }
+
+  @Get('runway')
+  @ApiOperation({ summary: 'Calcular los meses de supervivencia financiera (Runway)' })
+  getRunway(@Request() req) {
+    return this.analyticsService.getFinancialRunway(req.user.userId);
+  }
 }

@@ -229,4 +229,102 @@ export class AnalyticsService {
       weeklyAverage: Number(weeklyAverage.toFixed(2))
     };
   }
+
+  // 3.1 Progreso de Huchas (Saving Goals)
+  async getSavingGoalsProgress(userId: string) {
+    const goals = await this.prisma.savingGoal.findMany({
+      where: { userId: userId }
+    });
+
+    return goals.map(goal => {
+      const target = Number(goal.targetAmount);
+      const current = Number(goal.currentAmount);
+      
+      // Evitamos dividir por cero si el usuario no le puso objetivo
+      const percentage = target > 0 ? (current / target) * 100 : 0;
+
+      return {
+        name: goal.name,
+        targetAmount: target,
+        currentAmount: current,
+        progressPercentage: Number(percentage.toFixed(2)),
+        colorCode: '#2196F3', // Ponemos un color azul por defecto fijo
+        dueDate: goal.dueDate // Usamos tu campo real 'dueDate' en lugar de 'deadline'
+      };
+    });
+  }
+
+  // 3.2 Ratio de Ahorro Mensual
+  async getSavingsRatio(userId: string) {
+    const date = new Date();
+    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+
+    // Buscamos ingresos y gastos de este mes
+    const [expenses, incomes] = await Promise.all([
+      this.prisma.expense.aggregate({
+        where: { userId: userId, date: { gte: firstDay } },
+        _sum: { amount: true }
+      }),
+      this.prisma.income.aggregate({
+        where: { userId: userId, date: { gte: firstDay } },
+        _sum: { amount: true }
+      })
+    ]);
+
+    const totalExpense = Number(expenses._sum.amount || 0);
+    const totalIncome = Number(incomes._sum.amount || 0);
+
+    let ratio = 0;
+    if (totalIncome > 0) {
+      ratio = ((totalIncome - totalExpense) / totalIncome) * 100;
+    }
+
+    // Pequeña IA de estado financiero
+    let status = 'PELIGRO'; // Gasta más de lo que ingresa
+    if (ratio >= 20) status = 'EXCELENTE';
+    else if (ratio >= 10) status = 'BUENO';
+    else if (ratio > 0) status = 'REGULAR';
+
+    return {
+      month: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
+      totalIncome: totalIncome,
+      totalExpense: totalExpense,
+      savingsRatio: Number(ratio.toFixed(2)),
+      status: status
+    };
+  }
+
+  // 3.3 Runway (Meses de supervivencia)
+  async getFinancialRunway(userId: string) {
+    // 1. Calculamos liquidez total
+    const accounts = await this.prisma.account.findMany({
+      where: { userId: userId },
+      select: { balance: true }
+    });
+    const totalLiquidity = accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
+
+    // 2. Calculamos el gasto medio de los últimos 3 meses (90 días) para ser precisos
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+    const recentExpenses = await this.prisma.expense.aggregate({
+      where: { userId: userId, date: { gte: ninetyDaysAgo } },
+      _sum: { amount: true }
+    });
+
+    const threeMonthExpense = Number(recentExpenses._sum.amount || 0);
+    const averageMonthlyExpense = threeMonthExpense / 3;
+
+    // 3. Calculamos supervivencia (capeamos a 999 meses si no gasta nada para no romper el front)
+    let runwayMonths = 999;
+    if (averageMonthlyExpense > 0) {
+      runwayMonths = totalLiquidity / averageMonthlyExpense;
+    }
+
+    return {
+      totalLiquidity: Number(totalLiquidity.toFixed(2)),
+      averageMonthlyExpense: Number(averageMonthlyExpense.toFixed(2)),
+      runwayMonths: Number(runwayMonths.toFixed(1))
+    };
+  }
 }
