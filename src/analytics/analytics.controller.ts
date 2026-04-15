@@ -27,4 +27,22 @@ export class AnalyticsController {
   getTopSubscriptions(@Request() req) {
     return this.analyticsService.getTopRecurringExpenses(req.user.userId);
   }
+
+  @Get('cash-flow')
+  @ApiOperation({ summary: 'Obtener Ingresos vs Gastos de los últimos 6 meses' })
+  getSixMonthCashFlow(@Request() req) {
+    return this.analyticsService.getSixMonthCashFlow(req.user.userId);
+  }
+
+  @Get('net-worth-evolution')
+  @ApiOperation({ summary: 'Evolución del patrimonio neto de los últimos 6 meses' })
+  getNetWorthEvolution(@Request() req) {
+    return this.analyticsService.getNetWorthEvolution(req.user.userId);
+  }
+
+  @Get('expense-averages')
+  @ApiOperation({ summary: 'Promedio de gasto diario y semanal del mes en curso' })
+  getExpenseAverages(@Request() req) {
+    return this.analyticsService.getExpenseAverages(req.user.userId);
+  }
 }
