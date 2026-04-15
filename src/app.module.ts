@@ -13,6 +13,7 @@ import { RecurringPaymentModule } from './recurring-payment/recurring-payment.mo
 import { DebtModule } from './debt/debt.module';
 import { DocumentModule } from './document/document.module';
 import { ScheduleModule } from '@nestjs/schedule'; //Para los Cron Jobs de los pagos recurrentes
+import { AnalyticsModule } from './analytics/analytics.module'; //Para la parte de la analitica en Metabase
 // Asegúrate de NO importar el AuthController aquí arriba
 
 @Module({
@@ -29,7 +30,8 @@ imports: [
   RecurringPaymentModule,
   DebtModule,
   DocumentModule,
-  ScheduleModule.forRoot() //Para los Cron Jobs de los pagos recurrentes
+  ScheduleModule.forRoot(), //Para los Cron Jobs de los pagos recurrentes
+  AnalyticsModule
 ],
   controllers: [], // <-- ¡OJO! Aquí NO debe estar AuthController
   providers: [],
