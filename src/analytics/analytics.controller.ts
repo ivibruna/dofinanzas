@@ -63,4 +63,10 @@ export class AnalyticsController {
   getRunway(@Request() req) {
     return this.analyticsService.getFinancialRunway(req.user.userId);
   }
+
+  @Get('month-forecast')
+  @ApiOperation({ summary: 'Predicción del saldo disponible a final de mes' })
+  getMonthForecast(@Request() req) {
+    return this.analyticsService.getEndOfMonthForecast(req.user.userId);
+  }
 }

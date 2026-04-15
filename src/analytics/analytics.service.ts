@@ -327,4 +327,61 @@ export class AnalyticsService {
       runwayMonths: Number(runwayMonths.toFixed(1))
     };
   }
+
+  // 4. Proyecciones: Previsión de saldo a fin de mes
+  async getEndOfMonthForecast(userId: string) {
+    const today = new Date();
+    // Calculamos el último día del mes actual
+    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    const daysRemaining = lastDayOfMonth.getDate() - today.getDate();
+
+    // 1. Liquidez Actual (Saldo de todas las cuentas)
+    const accounts = await this.prisma.account.findMany({
+      where: { userId: userId },
+      select: { balance: true }
+    });
+    const currentBalance = accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
+
+    // 2. Gastos fijos pendientes (Suscripciones que vencen de aquí a final de mes)
+    const pendingSubscriptions = await this.prisma.recurringPayment.aggregate({
+      where: {
+        userId: userId,
+        active: true,
+        nextDueDate: {
+          gte: today, // Que venzan hoy o después
+          lte: lastDayOfMonth // Pero antes de que acabe el mes
+        }
+      },
+      _sum: { amount: true }
+    });
+    const pendingFixedExpenses = Number(pendingSubscriptions._sum.amount || 0);
+
+    // 3. Estimación de gastos variables (Basado en el ritmo de este mes)
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const expensesSoFar = await this.prisma.expense.aggregate({
+      where: {
+        userId: userId,
+        date: { gte: firstDayOfMonth, lte: today }
+      },
+      _sum: { amount: true }
+    });
+
+    const totalSpentSoFar = Number(expensesSoFar._sum.amount || 0);
+    const daysPassed = today.getDate() === 0 ? 1 : today.getDate(); // Evitar dividir por 0
+    const dailyAverage = totalSpentSoFar / daysPassed;
+    
+    // Lo que prevemos que vas a gastar en los días que quedan de mes
+    const projectedVariableExpenses = dailyAverage * daysRemaining;
+
+    // 4. Cálculo final del saldo proyectado
+    const projectedBalance = currentBalance - pendingFixedExpenses - projectedVariableExpenses;
+
+    return {
+      daysRemaining: daysRemaining,
+      currentBalance: Number(currentBalance.toFixed(2)),
+      pendingFixedExpenses: Number(pendingFixedExpenses.toFixed(2)),
+      projectedVariableExpenses: Number(projectedVariableExpenses.toFixed(2)),
+      expectedEndOfMonthBalance: Number(projectedBalance.toFixed(2))
+    };
+  }
 }
