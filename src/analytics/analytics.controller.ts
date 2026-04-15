@@ -15,4 +15,16 @@ export class AnalyticsController {
   getExpensesByCategory(@Request() req) {
     return this.analyticsService.getExpensesByCategory(req.user.userId);
   }
+
+  @Get('incomes-by-category')
+  @ApiOperation({ summary: 'Obtener ingresos del mes actual agrupados por categoría' })
+  getIncomesByCategory(@Request() req) {
+    return this.analyticsService.getIncomesByCategory(req.user.userId);
+  }
+
+  @Get('top-subscriptions')
+  @ApiOperation({ summary: 'Obtener el Top 5 de suscripciones ordenadas por impacto anual' })
+  getTopSubscriptions(@Request() req) {
+    return this.analyticsService.getTopRecurringExpenses(req.user.userId);
+  }
 }
