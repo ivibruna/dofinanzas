@@ -14,7 +14,7 @@ export class SavingGoalsService {
         targetAmount: dto.targetAmount,
         dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
         userId: userId,
-        // currentAmount empieza en 0 por defecto gracias a tu @default(0)
+        // currentAmount empieza en 0 por defecto
       },
     });
   }

@@ -8,22 +8,21 @@ export class ExpensesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: string, dto: CreateExpenseDto) {
-    // 1. Verificamos que la cuenta es suya y está activa
+    // Verificamos que la cuenta es suya y está activa
     const account = await this.prisma.account.findFirst({
       where: { id: dto.accountId, userId: userId, isActive: true },
     });
     if (!account) throw new NotFoundException('Cuenta no encontrada o inactiva');
 
-    // 2. Verificamos que la categoría es suya
+    // Verificamos que la categoría es suya
     const category = await this.prisma.expenseCategory.findFirst({
       where: { id: dto.categoryId, userId: userId },
     });
     if (!category) throw new NotFoundException('Categoría no encontrada');
 
-    // 3. LA TRANSACCIÓN: O se hacen ambas cosas, o ninguna
-    // Prisma maneja el tipo Decimal perfectamente con operaciones matemáticas
+    // Gestionamos la TRANSACCION (hacemos ambas cosas o ninguna)
     const [expense, updatedAccount] = await this.prisma.$transaction([
-      // A. Crear el ticket
+      // Crear el ticket
       this.prisma.expense.create({
         data: {
           amount: dto.amount,
@@ -34,7 +33,7 @@ export class ExpensesService {
           categoryId: dto.categoryId,
         },
       }),
-      // B. Restar el dinero de la cuenta
+      // Restar el dinero de la cuenta
       this.prisma.account.update({
         where: { id: dto.accountId },
         data: {
@@ -51,8 +50,8 @@ export class ExpensesService {
   async findAll(userId: string) {
     return this.prisma.expense.findMany({
       where: { userId: userId },
-      orderBy: { date: 'desc' }, // Los más recientes primero
-      // Le decimos a Prisma que nos traiga también el nombre de la cuenta y categoría
+      orderBy: { date: 'desc' }, // Los mas recientes primero
+      // Traemos el nombre de la cuenta y categoría
       include: {
         account: { select: { name: true } },
         category: { select: { name: true, colorCode: true } },
@@ -61,21 +60,21 @@ export class ExpensesService {
   }
 
   async update(userId: string, id: string, dto: UpdateExpenseDto) {
-    // 1. Buscamos el ticket original tal y como estaba
+    // Buscamos el ticket original
     const originalExpense = await this.prisma.expense.findFirst({
       where: { id: id, userId: userId },
     });
     if (!originalExpense) throw new NotFoundException('Gasto no encontrado');
 
-    // 2. Preparamos los datos nuevos (Si el usuario no manda algo, dejamos lo que había)
+    // Preparamos los datos nuevos (Si el usuario no manda algo, dejamos lo antiguo)
     const newAmount = dto.amount ?? originalExpense.amount;
     const newAccountId = dto.accountId ?? originalExpense.accountId;
     const newCategoryId = dto.categoryId ?? originalExpense.categoryId;
 
-    // 3. Preparamos la matriz de operaciones para la Transacción
+    // Preparamos la operaciones para la transaccion
     const operations: any[] = [];
 
-    // PASO A: Reembolsar el dinero viejo a la cuenta vieja
+    // Reembolsar el dinero viejo a la cuenta vieja
     operations.push(
       this.prisma.account.update({
         where: { id: originalExpense.accountId },
@@ -83,7 +82,7 @@ export class ExpensesService {
       })
     );
 
-    // PASO B: Cobrar el dinero nuevo a la cuenta nueva (o a la misma)
+    // Cobrar el dinero nuevo a la cuenta nueva (o a la misma)
     operations.push(
       this.prisma.account.update({
         where: { id: newAccountId },
@@ -91,7 +90,7 @@ export class ExpensesService {
       })
     );
 
-    // PASO C: Actualizar el papel (el ticket)
+    // Actualizar el ticket
     operations.push(
       this.prisma.expense.update({
         where: { id: id },
@@ -105,20 +104,20 @@ export class ExpensesService {
       })
     );
 
-    // 4. ¡EJECUTAR LA TRANSACCIÓN! (Si falla un paso, Prisma cancela los 3)
+    // Se ejecuta la transaccion (si algun paso falla se cancelan todos)
     await this.prisma.$transaction(operations);
 
     return { message: 'Gasto actualizado y cuentas rebalanceadas correctamente' };
   }
 
   async remove(userId: string, id: string) {
-    // 1. Buscamos el gasto
+    // Buscamos el gasto
     const expense = await this.prisma.expense.findFirst({
       where: { id: id, userId: userId },
     });
     if (!expense) throw new NotFoundException('Gasto no encontrado');
 
-    // 2. TRANSACCIÓN INVERSA: Borramos el ticket y devolvemos el dinero
+    // Borramos el ticket y devolvemos el dinero
     await this.prisma.$transaction([
       this.prisma.expense.delete({ where: { id: id } }),
       this.prisma.account.update({

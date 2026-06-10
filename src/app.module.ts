@@ -15,7 +15,6 @@ import { DocumentModule } from './document/document.module';
 import { ScheduleModule } from '@nestjs/schedule'; //Para los Cron Jobs de los pagos recurrentes
 import { AnalyticsModule } from './analytics/analytics.module'; //Para la parte de la analitica en Metabase
 import { AdvisorModule } from './advisor/advisor.module'
-// Asegúrate de NO importar el AuthController aquí arriba
 
 @Module({
 imports: [
@@ -35,7 +34,7 @@ imports: [
   AnalyticsModule,
   AdvisorModule
 ],
-  controllers: [], // <-- ¡OJO! Aquí NO debe estar AuthController
+  controllers: [],
   providers: [],
 })
 export class AppModule {}

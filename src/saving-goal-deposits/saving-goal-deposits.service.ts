@@ -7,7 +7,7 @@ export class SavingGoalDepositsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: string, dto: CreateSavingGoalDepositDto) {
-    // 1. Verificamos la cuenta origen
+    // Verificamos la cuenta origen
     const account = await this.prisma.account.findFirst({
       where: { id: dto.accountId, userId: userId, isActive: true },
     });
@@ -18,28 +18,27 @@ export class SavingGoalDepositsService {
       throw new BadRequestException('Saldo insuficiente en la cuenta bancaria');
     }
 
-    // 2. Verificamos la hucha destino
+    // Verificamos la hucha destino
     const goal = await this.prisma.savingGoal.findFirst({
       where: { id: dto.savingGoalId, userId: userId },
     });
     if (!goal) throw new NotFoundException('Meta de ahorro no encontrada');
 
-    // 3. LA TRANSACCIÓN A 3 BANDAS
+    // Hacemos la TRANSACCION
     const [deposit] = await this.prisma.$transaction([
-      // A. Crear el ticket del depósito
+      // Crear el ticket del depósito
       this.prisma.savingGoalDeposit.create({
         data: {
           amount: dto.amount,
           savingGoalId: dto.savingGoalId,
-          // Prisma asume la fecha actual por tu @default(now())
         },
       }),
-      // B. Sumar el dinero a la Hucha
+      // Sumar el dinero a la Hucha
       this.prisma.savingGoal.update({
         where: { id: dto.savingGoalId },
         data: { currentAmount: { increment: dto.amount } },
       }),
-      // C. Restar el dinero de la Cuenta Bancaria
+      // Restar el dinero de la Cuenta Bancaria
       this.prisma.account.update({
         where: { id: dto.accountId },
         data: { balance: { decrement: dto.amount } },
@@ -49,9 +48,9 @@ export class SavingGoalDepositsService {
     return deposit;
   }
 
-  // Borrar un depósito (Deshacer la operación)
+  // Borrar un deposito (Deshacer la operacion)
   async remove(userId: string, id: string, accountId: string) {
-    // Buscamos el depósito y comprobamos que la hucha sea de este usuario
+    // Buscamos el deposito y comprobamos que la hucha sea de este usuario
     const deposit = await this.prisma.savingGoalDeposit.findFirst({
       where: { id: id, savingGoal: { userId: userId } },
     });

@@ -14,9 +14,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  // Si la firma es válida, NestJS ejecuta esto y extrae los datos del token
+  // Si la firma es válida, se ejecuta y extraen los datos del token
   async validate(payload: any) {
-    // Al devolver esto, NestJS inyecta automáticamente { userId, email } en el objeto Request
+    // Al devolver esto se meten los datos del usuario { userId, email } en el objeto Request
     return { userId: payload.sub, email: payload.email };
   }
 }

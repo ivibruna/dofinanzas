@@ -52,17 +52,17 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales incorrectas');
     }
 
-    // 3. Creamos el "Payload" (los datos públicos que irán dentro del token)
-    // Usamos 'sub' (subject) para el ID del usuario, que es el estándar JWT
+    //Creamos el PAYLOAD (los datos públicos que van del token)
+    // SUB para el ID del usuario, que es el estándar JWT
     const payload = { sub: user.id, email: user.email };
 
-    // 4. Firmamos el token usando tu secreto del archivo .env
+    //Firmamos el token usando el secreto del archivo .env
     const token = await this.jwtService.signAsync(payload);
 
-    // 5. Devolvemos el token al frontend
+    //Devolvemos el token
     return {
       message: 'Has iniciado sesión correctamente',
-      accessToken: token, // ¡Aquí va el pasaporte!
+      accessToken: token, // Aqui va el PASSPORT
     };
   }
 }

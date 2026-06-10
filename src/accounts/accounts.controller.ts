@@ -6,9 +6,10 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard'; // Nuestro portero
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam } from '@nestjs/swagger';
 
 @ApiTags('Accounts')
-@ApiBearerAuth() // Esto añade el candado en Swagger
-@UseGuards(JwtAuthGuard) // Esto bloquea las peticiones sin Token
+@ApiBearerAuth() // Candado en Swagger
+@UseGuards(JwtAuthGuard) // Bloquear las peticiones sin Token
 @Controller('accounts')
+
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}
 

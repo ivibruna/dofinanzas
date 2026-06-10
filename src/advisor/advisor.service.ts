@@ -11,7 +11,7 @@ export class AdvisorService {
     this.ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
 
-  // --- EJECUTOR GENÉRICO CON RETROCESO EXPONENCIAL ---
+  // EJECUTOR GENÉRICO CON RETROCESO EXPONENCIAL
   private async executeWithRetry<T>(operation: () => Promise<T>, maxRetries: number = 3): Promise<T> {
     let attempt = 0;
 
@@ -30,19 +30,19 @@ export class AdvisorService {
         }
 
         const delay = Math.pow(2, attempt - 1) * 1000;
-        this.logger.warn(`⚠️ Intento ${attempt} fallido. Reintentando en ${delay}ms...`);
+        this.logger.warn(`Intento ${attempt} fallido. Reintentando en ${delay}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
     throw new InternalServerErrorException('No se pudo completar la operación con la IA.');
   }
 
-  // --- REPORTE MENSUAL EJECUTIVO ---
+  //REPORTE MENSUAL EJECUTIVO
   async getFinancialAdvice(userId: string) {
-    this.logger.log(`📊 Extrayendo métricas de PostgreSQL para el usuario ${userId}...`);
+    this.logger.log(`Extrayendo métricas de PostgreSQL para el usuario ${userId}...`);
 
     try {
-      // 1. Ejecución concurrente del Patrón Fachada
+      // Ejecución concurrente del patron
       const [gastos, ratio, runway, huchas] = await Promise.all([
         this.analyticsService.getExpensesByCategory(userId),
         this.analyticsService.getSavingsRatio(userId),
@@ -50,7 +50,7 @@ export class AdvisorService {
         this.analyticsService.getSavingGoalsProgress(userId),
       ]);
 
-      // 2. Serialización
+      //Serialización
       const userContext = JSON.stringify({
         gastos_mes_actual: gastos,
         salud_financiera: ratio,
@@ -58,7 +58,7 @@ export class AdvisorService {
         estado_huchas: huchas
       });
 
-      // 3. Ingeniería del Prompt
+      //Ingeniería del Prompt de la IA
       const prompt = `
         Actúa como un asesor financiero experto. Tienes un profundo conocimiento del mercado económico actual y la gestión de patrimonios.
         A continuación, te proporciono un JSON serializado con el análisis financiero real de este mes de mi cliente.
@@ -74,9 +74,9 @@ export class AdvisorService {
         }
       `;
 
-      this.logger.log('🤖 Contexto empaquetado. Solicitando análisis a la IA...');
+      this.logger.log('Contexto empaquetado. Solicitando análisis a la IA...');
       
-      // 4. Llamada blindada
+      //Llamada blindada
       const response = await this.executeWithRetry(() => 
         this.ai.models.generateContent({
           model: 'gemini-2.5-flash',
@@ -85,7 +85,7 @@ export class AdvisorService {
         })
       );
 
-      // ✅ FIX de TypeScript: Garantizar que existe texto antes de parsear
+      //Garantizamos que existe texto antes de parsear
       if (!response.text) {
         throw new Error('La IA devolvió una respuesta vacía');
       }
@@ -98,7 +98,7 @@ export class AdvisorService {
     }
   }
 
-  // --- IA AGÉNTICA (CHAT INTERACTIVO) ---
+  //OPCIONES QUE TIENE LA IA PARA OBTENER DATOS DEL USUARIO
   async askFinancialAdvisor(userId: string, userMessage: string) {
     const tools = [{
       functionDeclarations: [
@@ -122,7 +122,7 @@ export class AdvisorService {
     `;
 
     try {
-      this.logger.log('🧠 IA analizando la consulta del usuario...');
+      this.logger.log('IA analizando la consulta del usuario...');
       
       let response = await this.executeWithRetry(() => 
         this.ai.models.generateContent({
@@ -132,11 +132,11 @@ export class AdvisorService {
         })
       );
 
-      // ✅ FIX de TypeScript: Guardar en una constante inmutable
+      //Guardamos en una variable
       const aiFunctionCalls = response.functionCalls;
 
       if (aiFunctionCalls && aiFunctionCalls.length > 0) {
-        this.logger.log(`⚙️ La IA ha solicitado ejecutar ${aiFunctionCalls.length} funciones en paralelo.`);
+        this.logger.log(`La IA ha solicitado ejecutar ${aiFunctionCalls.length} funciones en paralelo.`);
 
         const functionResponses = await Promise.all(
           aiFunctionCalls.map(async (call) => {
@@ -166,14 +166,14 @@ export class AdvisorService {
           })
         );
 
-        this.logger.log(`🔄 Datos recuperados de la BD. Enviando el lote completo a la IA...`);
+        this.logger.log(`Datos recuperados de la BBDD. Enviando el lote completo a la IA...`);
 
         response = await this.executeWithRetry(() => 
           this.ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: [
               { role: 'user', parts: [{ text: prompt }] },
-              // ✅ FIX de TypeScript: Usar la constante validada
+              // Usamos la variable validada
               { role: 'model', parts: aiFunctionCalls.map(fc => ({ functionCall: fc })) },
               { role: 'user', parts: functionResponses }
             ],

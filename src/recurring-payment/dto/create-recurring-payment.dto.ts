@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNumber, IsEnum, IsDateString, Min, IsOptional, IsBoolean, IsUUID } from 'class-validator';
 
-// Asegúrate de que estos valores coincidan con tu Enum 'Frequency' en Prisma
 export enum PaymentFrequency {
   DAILY = 'DAILY',
   WEEKLY = 'WEEKLY',

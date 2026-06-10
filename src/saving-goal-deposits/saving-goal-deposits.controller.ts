@@ -21,7 +21,7 @@ export class SavingGoalDepositsController {
   @ApiOperation({ summary: 'Deshacer un depósito y devolver el dinero a la cuenta' })
   @ApiQuery({ name: 'accountId', description: 'ID de la cuenta a la que devolver el dinero' })
   remove(@Request() req, @Param('id') id: string, @Query('accountId') accountId: string) {
-    // Al borrar, necesitamos saber por Query (?) a qué cuenta devolver el dinero
+    // Al borrar, necesitamos saber por Query (?) a que cuenta devolver el dinero
     return this.savingGoalDepositsService.remove(req.user.userId, id, accountId);
   }
 }

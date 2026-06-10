@@ -27,7 +27,7 @@ export class CreateAccountDto {
 
   @ApiProperty({
     example: 'Cuenta compartida para los gastos del piso', 
-    description: 'Notas adicionales o propósito de la cuenta',
+    description: 'Proposito de la cuenta o informacion adicional',
     required: false
   })
   @IsString()

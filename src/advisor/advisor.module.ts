@@ -7,6 +7,6 @@ import { AnalyticsModule } from '../analytics/analytics.module';
   imports: [AnalyticsModule],
   controllers: [AdvisorController],
   providers: [AdvisorService],
-  exports: [AdvisorService], // Lo exportamos por si lo necesitas en el futuro
+  exports: [AdvisorService],
 })
 export class AdvisorModule {}

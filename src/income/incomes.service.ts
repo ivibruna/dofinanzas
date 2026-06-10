@@ -18,7 +18,7 @@ export class IncomesService {
     });
     if (!category) throw new NotFoundException('Categoría no encontrada');
 
-    // TRANSACCIÓN: Crear ingreso y sumar dinero
+    // Creamos ingreso y sumar dinero
     const [income] = await this.prisma.$transaction([
       this.prisma.income.create({
         data: {
@@ -60,9 +60,9 @@ export class IncomesService {
     const newAccountId = dto.accountId ?? originalIncome.accountId;
     const newCategoryId = dto.categoryId ?? originalIncome.categoryId;
 
-    const operations: any[] = []; // <-- Prevenimos el error TS2345 (never)
+    const operations: any[] = []; 
 
-    // A: Restar el dinero viejo de la cuenta vieja
+    //Restar el dinero viejo de la cuenta vieja
     operations.push(
       this.prisma.account.update({
         where: { id: originalIncome.accountId },
@@ -70,7 +70,7 @@ export class IncomesService {
       })
     );
 
-    // B: Sumar el dinero nuevo a la cuenta nueva (o a la misma)
+    //Sumar el dinero nuevo a la cuenta nueva (o a la misma)
     operations.push(
       this.prisma.account.update({
         where: { id: newAccountId },
@@ -78,7 +78,7 @@ export class IncomesService {
       })
     );
 
-    // C: Actualizar el registro del ingreso
+    //Actualizar el registro del ingreso
     operations.push(
       this.prisma.income.update({
         where: { id: id },
@@ -102,12 +102,12 @@ export class IncomesService {
     });
     if (!income) throw new NotFoundException('Ingreso no encontrado');
 
-    // TRANSACCIÓN: Borrar registro y restar dinero devuelto
+    //Borrar registro y restar dinero devuelto
     await this.prisma.$transaction([
       this.prisma.income.delete({ where: { id: id } }),
       this.prisma.account.update({
         where: { id: income.accountId },
-        data: { balance: { decrement: income.amount } }, // <-- Quitamos la pasta
+        data: { balance: { decrement: income.amount } },
       }),
     ]);
 

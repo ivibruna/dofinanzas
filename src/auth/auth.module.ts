@@ -10,7 +10,7 @@ import { JwtStrategy } from './jwt.strategy';
     // Configuramos el motor de Tokens JWT
     JwtModule.register({
       global: true, // Lo hacemos global para proteger cualquier ruta después
-      secret: process.env.JWT_SECRET, // Leerá la clave secreta de tu archivo .env
+      secret: process.env.JWT_SECRET, // Leerá la clave secreta del archivo .env
       signOptions: { expiresIn: '1h' }, // El token caduca en 1 hora
     }),
   ],

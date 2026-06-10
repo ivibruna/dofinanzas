@@ -31,7 +31,7 @@ export class DocumentService {
     return this.prisma.document.findMany({
       where: { userId: userId },
       orderBy: { uploadedAt: 'desc' },
-      // Incluimos información básica del gasto si lo tiene (para pintarlo en el Frontend)
+      // Incluimos informacion basica del gasto si tiene
       include: {
         expense: { select: { amount: true, description: true, date: true } }
       }
@@ -68,10 +68,6 @@ export class DocumentService {
 
   async remove(userId: string, id: string) {
     await this.findOne(userId, id);
-    
-    // NOTA FUTURA: Aquí, además de borrar el registro en base de datos, 
-    // se programaría el borrado del archivo físico (PDF/JPG) del servidor (ej: fs.unlinkSync)
-    
     return this.prisma.document.delete({
       where: { id: id },
     });

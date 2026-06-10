@@ -8,13 +8,13 @@ export class RecurringPaymentTask {
 
   constructor(private readonly prisma: PrismaService) {}
   @Cron('1 0 * * *') // Se ejecuta todos los días a las 00:01
-  //@Cron(CronExpression.EVERY_MINUTE) //Esto es cada minuto, solo lo utilizamos para pruebas 
+  //@Cron(CronExpression.EVERY_MINUTE) //Esto es cada minuto, solo lo utilizamos para pruebas (para ver los cambios al momento de realizarlas) 
   async handleRecurringPayments() {
     this.logger.log('Iniciando procesamiento de pagos recurrentes...');
 
     const today = new Date();
 
-    // 1. Buscamos pagos activos que ya han vencido
+    // Buscamos pagos activos que ya han vencido
     const pendingPayments = await this.prisma.recurringPayment.findMany({
       where: {
         active: true,
@@ -37,7 +37,7 @@ export class RecurringPaymentTask {
     const nextDate = this.calculateNextDate(payment.nextDueDate, payment.frequency);
 
     await this.prisma.$transaction([
-      // A. Crear el Gasto real
+      // Crear el Gasto real
       this.prisma.expense.create({
         data: {
           amount: payment.amount,
@@ -48,12 +48,12 @@ export class RecurringPaymentTask {
           categoryId: payment.categoryId,
         },
       }),
-      // B. Restar dinero de la cuenta
+      // Restar dinero de la cuenta
       this.prisma.account.update({
         where: { id: payment.accountId },
         data: { balance: { decrement: payment.amount } },
       }),
-      // C. Actualizar la fecha del próximo cobro en la suscripción
+      // Actualizar la fecha del proximo cobro en la suscripcion
       this.prisma.recurringPayment.update({
         where: { id: payment.id },
         data: { nextDueDate: nextDate },

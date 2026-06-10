@@ -7,7 +7,7 @@ export class CreateExpenseDto {
     description: 'Cantidad gastada'
   })
   @IsNumber()
-  @Min(0.01) // No tiene sentido un gasto de 0 o negativo
+  @Min(0.01) // No tiene sentido un gasto menor de 0 euros (o negativo)
   amount: number;
 
   @ApiProperty({

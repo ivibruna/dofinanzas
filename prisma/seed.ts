@@ -2,20 +2,20 @@ import { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-// 1. Configuramos el Pool nativo de Postgres
+//Configuramos el Pool nativo de Postgres
 const connectionString = "postgresql://dofinanzas:dofinanzas@localhost:5433/dofinanzas_db?schema=public";
 const pool = new Pool({ connectionString });
 
-// 2. Creamos el adaptador oficial
+//Creamos el adaptador
 const adapter = new PrismaPg(pool);
 
-// 3. Instanciamos Prisma 7 cumpliendo sus nuevas reglas estrictas
+//Instanciamos Prisma
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
   const userId = 'c03d99ae-e5ef-4622-96e5-7832625296e5';
 
-  console.log('🚀 Iniciando semillado de datos (Prisma v7)...');
+  console.log('INICIO SEMILLADO DE DATOS');
 
   // 1. Asegurar el Usuario
   await prisma.user.upsert({
@@ -25,11 +25,11 @@ async function main() {
       id: userId,
       email: 'demo.ingeniero@dofinanzas.com',
       password: '$2b$10$ep/1hE81jNToq1E1H1b.r.V5zM3mYI9Y7/O/z8Oq9Y4Y9r6/Q/K6m', 
-      name: 'Iván Demo',
+      name: 'Ivan Demo',
     },
   });
 
-  // 2. Funciones para Categorías
+  //Funciones para Categorías
   async function getExpenseCategory(name: string) {
     let category = await prisma.expenseCategory.findFirst({ where: { name, userId } });
     if (!category) {
@@ -45,21 +45,22 @@ async function main() {
     }
     return category.id;
   }
-
+  
+  //Variables perfil
   const catVivienda = await getExpenseCategory('Vivienda');
   const catOcio = await getExpenseCategory('Ocio');
   const catComida = await getExpenseCategory('Alimentación');
   const catGym = await getExpenseCategory('Deporte');
   const catNomina = await getIncomeCategory('Nómina');
 
-  // 3. Limpieza total para este usuario
-  console.log('🧹 Limpiando registros antiguos...');
+  //Limpieza total para el usuario
+  console.log('LIMPIANDO DATOS ANTIGUOS');
   await prisma.expense.deleteMany({ where: { userId } });
   await prisma.income.deleteMany({ where: { userId } });
   await prisma.savingGoal.deleteMany({ where: { userId } });
   await prisma.account.deleteMany({ where: { userId } });
 
-  // 4. Crear Cuentas
+  //Generamos cuentas para el usuario
   const accCorriente = await prisma.account.create({
     data: { userId, name: 'Cuenta Corriente BBVA', balance: 2500, type: 'BANK' } 
   });
@@ -68,8 +69,8 @@ async function main() {
     data: { userId, name: 'Cuenta Ahorro Revolut', balance: 9000, type: 'BANK' }
   });
 
-  // 5. Generar 6 meses de historial (Enero a Junio 2026)
-  console.log('📅 Generando historial de 6 meses...');
+  //Generamos historial para el usuario
+  console.log('GENERAMOS HISTORIAL ULTIMOS 6 MESES DEL USUARIO');
   for (let m = 1; m <= 6; m++) {
     const mes = m.toString().padStart(2, '0');
     
@@ -103,7 +104,7 @@ async function main() {
     }
   }
 
-  // 6. Huchas
+  //Generamos huchas
   await prisma.savingGoal.createMany({
     data: [
       { userId, name: 'Fondo de Emergencia', targetAmount: 12000, currentAmount: 8500, dueDate: new Date('2026-12-31') },
@@ -111,16 +112,16 @@ async function main() {
     ]
   });
 
-  console.log('✅ ¡Semillado completado con éxito!');
+  console.log('SEMILLADO DATOS COMPLETADO');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error fatal:', e);
+    console.error('ERROR EN EL SEMILLLADO: ', e);
     process.exit(1);
   })
   .finally(async () => {
-    // Cerramos Prisma y el Pool para que el script no se quede colgado
+    // Cerramos Prisma
     await prisma.$disconnect();
     await pool.end();
   });

@@ -12,7 +12,7 @@ export class AccountsService {
     return this.prisma.account.create({
       data: {
         ...dto,
-        userId: userId, // La clave foránea que los une
+        userId: userId,
       },
     });
   }
@@ -22,7 +22,7 @@ export class AccountsService {
     return this.prisma.account.findMany({
       where: { 
         userId: userId,
-        isActive: true //SOLO MOSTRAMOS CUENTAS ACTIVAS
+        isActive: true //Solo mostramos las cuentas Activas (TRUE)
     },
     });
   }
@@ -57,7 +57,7 @@ export class AccountsService {
   }
 
   async update(userId: string, accountId: string, dto: UpdateAccountDto) {
-    // 1. Verificamos que la cuenta existe y es suya
+    //Verificamos que la cuenta existe y es suya
     const account = await this.prisma.account.findFirst({
       where: { id: accountId, userId: userId },
     });
@@ -78,7 +78,7 @@ export class AccountsService {
 
     if (!account) throw new NotFoundException('Cuenta no encontrada');
 
-    // BORRADO LÓGICO: No hacemos .delete(), hacemos un .update() del estado
+    // Borrado poniendo a FALSE - No hacemos .delete(), hacemos un .update() del estado
     return this.prisma.account.update({
       where: { id: accountId },
       data: { isActive: false },

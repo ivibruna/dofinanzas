@@ -31,7 +31,7 @@ export class SavingGoalsController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Modificar datos de la meta (ej: subir el target)' })
+  @ApiOperation({ summary: 'Modificar datos de la meta' })
   update(@Request() req, @Param('id') id: string, @Body() updateSavingGoalDto: UpdateSavingGoalDto) {
     return this.savingGoalsService.update(req.user.userId, id, updateSavingGoalDto);
   }

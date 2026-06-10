@@ -26,11 +26,10 @@ export class CreateDocumentDto {
   type: DocumentType;
 
   @ApiProperty({
-    example: 'https://mi-servidor.com/archivos/ticket-123.pdf',
-    description: 'Ruta o URL del archivo físico'
+    example: 'https:Ruta donde esta el archivo',
+    description: 'Ruta o URL del archivo Drive'
   })
   @IsString()
-  // @IsUrl() // Opcional: Descomenta esto si vas a forzar que sea una URL de internet (S3, Cloudinary). Si vas a usar rutas locales como '/uploads/file.pdf', déjalo solo con @IsString()
   url: string;
 
   @ApiProperty({

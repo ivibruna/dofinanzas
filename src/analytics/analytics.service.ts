@@ -12,7 +12,6 @@ export class AnalyticsService {
     const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
     const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-    // Hacemos la magia con Prisma
     const expensesByCategory = await this.prisma.expense.groupBy({
       by: ['categoryId'],
       where: {

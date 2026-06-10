@@ -9,7 +9,7 @@ generator client {
 }
 
 // ==========================================
-// ENUMS (Reglas de negocio e integridad)
+// ENUMERACIONES
 // ==========================================
 
 enum Role {
@@ -40,9 +40,10 @@ enum DocumentType {
 }
 
 // ==========================================
-// MODELOS DE NÚCLEO (Core)
+// MODELOS BASE DE DATOS
 // ==========================================
 
+//USER
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -64,13 +65,14 @@ model User {
   documents         Document[]
 }
 
+//ACCOUNT
 model Account {
   id          String      @id @default(uuid())
   name        String
   type        AccountType
   description String?     @default("")
   balance     Decimal     @db.Decimal(10, 2)
-  isActive    Boolean     @default(true) // Borrado lógico para preservar histórico
+  isActive    Boolean     @default(true) // "Borrado" con FALSE para preservar historico de las cuentas
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
@@ -84,16 +86,13 @@ model Account {
   @@unique([name, userId]) // Unicidad por usuario
 }
 
-// ==========================================
-// CATEGORIZACIÓN (Analítica)
-// ==========================================
-
+//EXPENSE CATEGGORY
 model ExpenseCategory {
   id            String   @id @default(uuid())
   name          String
   description   String?
   colorCode     String?  @default("#000000")
-  monthlyBudget Decimal? @db.Decimal(10, 2) // Clave para la IA
+  monthlyBudget Decimal? @db.Decimal(10, 2)
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -104,6 +103,7 @@ model ExpenseCategory {
   @@unique([name, userId])
 }
 
+//INCOME CATEGORY
 model IncomeCategory {
   id          String  @id @default(uuid())
   name        String
@@ -118,10 +118,7 @@ model IncomeCategory {
   @@unique([name, userId])
 }
 
-// ==========================================
-// TRANSACCIONES (Big Data)
-// ==========================================
-
+//EXPENSE
 model Expense {
   id          String   @id @default(uuid())
   amount      Decimal  @db.Decimal(10, 2)
@@ -139,9 +136,10 @@ model Expense {
 
   documents Document[]
 
-  @@index([userId, date]) // Optimización para Metabase y analítica
+  @@index([userId, date])
 }
 
+//INCOME
 model Income {
   id          String   @id @default(uuid())
   amount      Decimal  @db.Decimal(10, 2)
@@ -160,10 +158,7 @@ model Income {
   @@index([userId, date])
 }
 
-// ==========================================
-// PLANIFICACIÓN Y DEUDA (Predicción IA)
-// ==========================================
-
+//RECURRING PAYMENT
 model RecurringPayment {
   id          String    @id @default(uuid())
   name        String
@@ -185,6 +180,7 @@ model RecurringPayment {
   category   ExpenseCategory @relation(fields: [categoryId], references: [id])
 }
 
+//DEBT
 model Debt {
   id           String   @id @default(uuid())
   name         String
@@ -197,6 +193,7 @@ model Debt {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+//SAVING GOAL
 model SavingGoal {
   id            String    @id @default(uuid())
   name          String
@@ -210,6 +207,7 @@ model SavingGoal {
   deposits SavingGoalDeposit[]
 }
 
+//DAVING GOAL DEPOSIT
 model SavingGoalDeposit {
   id     String   @id @default(uuid())
   amount Decimal  @db.Decimal(10, 2)
@@ -219,10 +217,7 @@ model SavingGoalDeposit {
   savingGoal   SavingGoal @relation(fields: [savingGoalId], references: [id], onDelete: Cascade)
 }
 
-// ==========================================
-// DOCUMENTACIÓN Y EVIDENCIAS
-// ==========================================
-
+//DOCUMENTS
 model Document {
   id         String       @id @default(uuid())
   name       String

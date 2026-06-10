@@ -8,7 +8,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 @ApiTags('Income Category')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('income-category') // Endpoint en singular
+@Controller('income-category')
 export class IncomeCategoryController {
   constructor(private readonly incomeCategoryService: IncomeCategoryService) {}
 

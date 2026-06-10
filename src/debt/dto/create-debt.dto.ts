@@ -3,7 +3,7 @@ import { IsString, IsNumber, IsDateString, Min, IsOptional, IsBoolean } from 'cl
 
 export class CreateDebtDto {
   @ApiProperty({
-    example: 'Préstamo Coche',
+    example: 'Prestamo Coche',
     description: 'Concepto de la deuda'
   })
   @IsString()
@@ -11,7 +11,7 @@ export class CreateDebtDto {
 
   @ApiProperty({
     example: 5000.00,
-    description: 'Cantidad total que se debe'
+    description: 'Cantidad total que se debe en la deuda'
   })
   @IsNumber()
   @Min(0.01)
@@ -20,7 +20,7 @@ export class CreateDebtDto {
   @ApiProperty({
     example: 7.5,
     required: false,
-    description: 'Tasa de interés (%) para análisis de IA'
+    description: 'Tasa de interés (%)'
   })
   @IsNumber()
   @IsOptional()
@@ -28,7 +28,7 @@ export class CreateDebtDto {
 
   @ApiProperty({
     example: '2028-12-31T00:00:00Z',
-    description: 'Fecha límite de pago'
+    description: 'Fecha limite de pago'
   })
   @IsDateString()
   dueDate: string;
