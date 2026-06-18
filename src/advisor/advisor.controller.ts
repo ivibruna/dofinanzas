@@ -14,12 +14,12 @@ export class AdvisorController {
   async getAdvice(@Req() req) {
     const userId = req.user.userId;
     
-    console.log('⏳ Controlador esperando respuesta de la IA...');
+    console.log('Controlador esperando respuesta de la IA...');
     
     // Forzamos al controlador a pausar su ejecución y esperar al servicio
     const result = await this.advisorService.getFinancialAdvice(userId);
     
-    console.log('✅ Controlador ha recibido la respuesta, enviando a Swagger!');
+    console.log('Controlador ha recibido la respuesta, enviando a Swagger!');
     
     return result; 
   }
@@ -30,7 +30,7 @@ export class AdvisorController {
   async askAdvisor(@Req() req, @Body('message') message: string) {
     const userId = req.user.userId;
     
-    console.log(`💬 Usuario pregunta: "${message}"`);
+    console.log(`Usuario pregunta: "${message}"`);
     return await this.advisorService.askFinancialAdvisor(userId, message);
   }
 }
