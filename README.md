@@ -64,6 +64,10 @@ El proyecto está construido bajo una arquitectura robusta y escalable utilizand
 * **Año Académico:** 2025-2026
 
 
+
+
+
+
 <p align="center">
-  <img src="docs/Gif.gif" alt="chao!!" width="800">
+  <img src="docs/Gif.gif" alt="chao!!" width="300">
 </p>
