@@ -12,7 +12,7 @@ export class AdvisorController {
   @UseGuards(JwtAuthGuard)
   @Get('advice')
   async getAdvice(@Req() req) {
-    const userId = req.user.id || req.user.sub; 
+    const userId = req.user.userId;
     
     console.log('⏳ Controlador esperando respuesta de la IA...');
     
@@ -28,7 +28,7 @@ export class AdvisorController {
   @Post('chat')
   @ApiBody({ schema: { properties: { message: { type: 'string', example: '¿En qué estoy gastando más dinero este mes?' } } } })
   async askAdvisor(@Req() req, @Body('message') message: string) {
-    const userId = req.user.id || req.user.sub;
+    const userId = req.user.userId;
     
     console.log(`💬 Usuario pregunta: "${message}"`);
     return await this.advisorService.askFinancialAdvisor(userId, message);

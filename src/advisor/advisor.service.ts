@@ -39,6 +39,7 @@ export class AdvisorService {
 
   //REPORTE MENSUAL EJECUTIVO
   async getFinancialAdvice(userId: string) {
+    this.logger.debug(`DEBUG: El userId que llega al AdvisorService es: "${userId}"`);
     this.logger.log(`Extrayendo métricas de PostgreSQL para el usuario ${userId}...`);
 
     try {
@@ -100,6 +101,7 @@ export class AdvisorService {
 
   //OPCIONES QUE TIENE LA IA PARA OBTENER DATOS DEL USUARIO
   async askFinancialAdvisor(userId: string, userMessage: string) {
+    this.logger.debug(`DEBUG: El userId que llega al AdvisorService es: "${userId}"`);
     const tools = [{
       functionDeclarations: [
         { name: 'getExpensesByCategory', description: 'Útil SÓLO para ver el desglose de gastos en categorías (ocio, vivienda, etc.) del MES ACTUAL. No usar para proyecciones ni históricos.' },
