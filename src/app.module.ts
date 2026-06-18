@@ -1,12 +1,40 @@
+/* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { UsersModule } from './users/users.module';
+import { AccountsModule } from './accounts/accounts.module';
+import { ExpenseCategoryModule } from './expense-category/expense-category.module';
+import { ExpensesModule } from './expense/expenses.module';
+import { IncomeCategoryModule } from './income-category/income-category.module';
+import { IncomesModule } from './income/incomes.module';
+import { SavingGoalsModule } from './saving-goals/saving-goals.module';
+import { SavingGoalDepositsModule } from './saving-goal-deposits/saving-goal-deposits.module';
+import { RecurringPaymentModule } from './recurring-payment/recurring-payment.module';
+import { DebtModule } from './debt/debt.module';
+import { DocumentModule } from './document/document.module';
+import { ScheduleModule } from '@nestjs/schedule'; //Para los Cron Jobs de los pagos recurrentes
+import { AnalyticsModule } from './analytics/analytics.module'; //Para la parte de la analitica en Metabase
+import { AdvisorModule } from './advisor/advisor.module'
 
 @Module({
-  imports: [PrismaModule, UsersModule],
-  controllers: [AppController],
-  providers: [AppService],
+imports: [
+  AuthModule,
+  PrismaModule, 
+  AccountsModule, 
+  ExpenseCategoryModule, 
+  ExpensesModule, 
+  IncomeCategoryModule,
+  IncomesModule,
+  SavingGoalsModule,
+  SavingGoalDepositsModule,
+  RecurringPaymentModule,
+  DebtModule,
+  DocumentModule,
+  ScheduleModule.forRoot(), //Para los Cron Jobs de los pagos recurrentes
+  AnalyticsModule,
+  AdvisorModule
+],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
