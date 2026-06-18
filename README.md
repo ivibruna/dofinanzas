@@ -65,5 +65,5 @@ El proyecto está construido bajo una arquitectura robusta y escalable utilizand
 
 
 <p align="center">
-  <img src="./assets/gif.gif" alt="chao!!" width="800">
+  <img src="./docs/gif.gif" alt="chao!!" width="800">
 </p>
